@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Trip Budget Planner | AOA Algorithmic Travel Optimizer</title>
+    <meta name="description" content="An Analysis and Design of Algorithms (AOA) project optimizing trip budgets, activity selection with 0/1 Knapsack, shortest paths with Dijkstra and Floyd-Warshall, and multi-stop itineraries with TSP Branch & Bound.">
+    
+    <!-- Google Fonts for Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-dark">
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <span class="logo-icon">🧭</span>
+                </div>
+                <div class="brand-text">
+                    <h1 class="brand-title">Smart Trip</h1>
+                    <span class="brand-badge">AOA OPTIMIZER</span>
+                </div>
+            </div>
+
+            <div class="brand-tagline">
+                “Plan smarter. Spend better. Travel more.”
+            </div>
+
+            <nav class="sidebar-nav" aria-label="Main Navigation">
+                <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Dashboard</span>
+                </button>
+                <button class="nav-item" data-view="create-trip" id="nav-create-trip">
+                    <span class="nav-icon">✨</span>
+                    <span class="nav-label">Create Trip</span>
+                </button>
+                <button class="nav-item" data-view="budget-optimizer" id="nav-budget-optimizer">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-label">Budget Optimizer</span>
+                </button>
+                <button class="nav-item" data-view="route-planner" id="nav-route-planner">
+                    <span class="nav-icon">🗺️</span>
+                    <span class="nav-label">Route Planner</span>
+                </button>
+                <button class="nav-item" data-view="itinerary" id="nav-itinerary">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-label">Daily Itinerary</span>
+                </button>
+                <button class="nav-item" data-view="algorithm-analysis" id="nav-algorithm-analysis">
+                    <span class="nav-icon">🔬</span>
+                    <span class="nav-label">Algorithm Analysis</span>
+                </button>
+                <button class="nav-item" data-view="saved-trips" id="nav-saved-trips">
+                    <span class="nav-icon">📁</span>
+                    <span class="nav-label">Saved Trips</span>
+                </button>
+                <button class="nav-item" data-view="about" id="nav-about">
+                    <span class="nav-icon">ℹ️</span>
+                    <span class="nav-label">About Project</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="current-trip-chip" id="sidebar-trip-chip">
+                    <div class="chip-label">ACTIVE TRIP</div>
+                    <div class="chip-name" id="sidebar-active-trip-name">Udaipur Explorer</div>
+                    <div class="chip-budget" id="sidebar-active-trip-budget">₹25,000 • 2 Travelers</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Header bar -->
+            <header class="top-header">
+                <button class="mobile-toggle-btn" id="mobile-sidebar-toggle" aria-label="Toggle navigation">
+                    ☰
+                </button>
+                <div class="header-breadcrumbs" id="header-breadcrumbs">
+                    <span class="crumb-root">Platform</span>
+                    <span class="crumb-sep">/</span>
+                    <span class="crumb-active" id="current-view-title">Dashboard</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary btn-sm" id="btn-quick-sample">
+                        <span>🔄 Reset Sample Trip</span>
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="btn-header-new-trip">
+                        <span>+ New Trip</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Global Alert Container -->
+            <div id="global-alert-box" class="global-alert hidden" role="alert"></div>
+
+            <!-- VIEW: Dashboard -->
+            <section class="view-panel active" id="view-dashboard">
+                <div class="dashboard-hero">
+                    <div class="hero-text">
+                        <h2 class="hero-title">Plan your perfect trip</h2>
+                        <p class="hero-subtitle">Optimize your budget, activities, and routes using intelligent algorithmic problem solving.</p>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" id="dash-btn-create">
+                            <span>+ Create New Trip</span>
+                        </button>
+                        <button class="btn btn-accent" id="dash-btn-run-demo">
+                            <span>🚀 Full Optimization Demo</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrapper cyan">✈️</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Active Trip</span>
+                            <span class="kpi-value" id="kpi-trip-name">Udaipur Explorer</span>
+                            <span class="kpi-sub" id="kpi-trip-meta">4 Days • 2 Travelers</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrapper blue">💼</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Total Budget</span>
+                            <span class="kpi-value" id="kpi-total-budget">₹25,000</span>
+                            <span class="kpi-sub">Allocated Fund</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrapper amber">📉</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Estimated Spending</span>
+                            <span class="kpi-value" id="kpi-estimated-cost">₹22,450</span>
+                            <span class="kpi-sub" id="kpi-spending-sub">Knapsack + Transit + Stays</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrapper green" id="kpi-remaining-card">
+                            <div class="kpi-icon-wrapper green">💰</div>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Budget Remaining</span>
+                            <span class="kpi-value text-success" id="kpi-remaining-budget">₹2,550</span>
+                            <span class="kpi-sub" id="kpi-budget-status">Within Target</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Summary Modules -->
+                <div class="dash-columns">
+                    <!-- Left: Budget Progress & Chart -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Budget Allocation & Utilization</h3>
+                                <p class="card-subtitle">Real-time breakdown calculated across all trip categories</p>
+                            </div>
+                            <span class="badge badge-cyan" id="dash-optim-mode-badge">Balanced Mode</span>
+                        </div>
+
+                        <!-- Progress Bar Container -->
+                        <div id="dash-budget-progress-container" class="budget-progress-box"></div>
+
+                        <!-- Donut Chart & Legend -->
+                        <div class="chart-and-legend">
+                            <div class="chart-wrapper">
+                                <canvas id="dash-budget-donut-canvas" width="280" height="280"></canvas>
+                            </div>
+                            <div class="legend-list" id="dash-budget-legend"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Quick Algorithmic Insights -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Smart Algorithmic Insights</h3>
+                                <p class="card-subtitle">Factual metrics calculated directly from algorithmic execution</p>
+                            </div>
+                            <span class="badge badge-accent">Live Telemetry</span>
+                        </div>
+
+                        <div class="insights-list" id="dash-insights-list">
+                            <!-- Dynamic factual insights populated by JS -->
+                        </div>
+
+                        <div class="quick-nav-pills">
+                            <button class="pill-btn" data-target="budget-optimizer">View 0/1 Knapsack DP Table →</button>
+                            <button class="pill-btn" data-target="route-planner">Explore Dijkstra & Floyd-Warshall →</button>
+                            <button class="pill-btn" data-target="itinerary">View TSP Itinerary Order →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Trip Highlights -->
+                <div class="content-card mt-6">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">Optimal Activities Selected by 0/1 Knapsack</h3>
+                            <p class="card-subtitle">Items chosen to maximize cumulative experience score within allocated activity budget</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="dash-btn-view-knapsack">
+                            Inspect DP Solution →
+                        </button>
+                    </div>
+                    <div class="activity-cards-grid" id="dash-selected-activities-grid"></div>
+                </div>
+            </section>
+
+            <!-- VIEW: Create Trip (Multi-step Wizard) -->
+            <section class="view-panel" id="view-create-trip">
+                <div class="section-top-bar">
+                    <div>
+                        <h2 class="section-main-heading">Create & Configure Trip</h2>
+                        <p class="section-sub-heading">Provide trip constraints to let the algorithms construct an optimal plan.</p>
+                    </div>
+                </div>
+
+                <!-- Wizard Progress Indicator -->
+                <div class="wizard-stepper">
+                    <div class="wizard-step active" data-step="1">
+                        <div class="step-num">1</div>
+                        <div class="step-title">Basic Details</div>
+                    </div>
+                    <div class="wizard-step" data-step="2">
+                        <div class="step-num">2</div>
+                        <div class="step-title">Locations</div>
+                    </div>
+                    <div class="wizard-step" data-step="3">
+                        <div class="step-num">3</div>
+                        <div class="step-title">Connections</div>
+                    </div>
+                    <div class="wizard-step" data-step="4">
+                        <div class="step-num">4</div>
+                        <div class="step-title">Activities</div>
+                    </div>
+                    <div class="wizard-step" data-step="5">
+                        <div class="step-num">5</div>
+                        <div class="step-title">Review & Run</div>
+                    </div>
+                </div>
+
+                <!-- Step 1 Form -->
+                <div class="wizard-pane active" id="wizard-pane-1">
+                    <div class="content-card">
+                        <h3 class="card-title">Step 1 — Basic Trip Details & Optimization Objective</h3>
+                        <p class="card-subtitle">Configure financial constraints and algorithm optimization mode.</p>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="input-trip-name">Trip Name *</label>
+                                <input type="text" id="input-trip-name" class="form-control" value="Udaipur Explorer" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-travelers">Number of Travelers *</label>
+                                <input type="number" id="input-travelers" class="form-control" min="1" max="50" value="2" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-days">Number of Days *</label>
+                                <input type="number" id="input-days" class="form-control" min="1" max="30" value="4" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-budget">Total Budget (₹) *</label>
+                                <input type="number" id="input-budget" class="form-control" min="1000" step="500" value="25000" required>
+                            </div>
+                        </div>
+
+                        <!-- Optimization Mode Selection -->
+                        <div class="mt-6">
+                            <label class="form-label-heading">Optimization Objective Mode</label>
+                            <p class="form-help-text">Select how the algorithms should balance trade-offs between cost, time, and experience value.</p>
+                            
+                            <div class="mode-cards-grid">
+                                <div class="mode-card" data-mode="Budget Saver">
+                                    <div class="mode-icon">💰</div>
+                                    <h4 class="mode-title">Budget Saver</h4>
+                                    <p class="mode-desc">Prioritizes cost minimization. Selects economical transport and filters activities to maximize savings.</p>
+                                </div>
+                                <div class="mode-card selected" data-mode="Balanced">
+                                    <div class="mode-icon">⚖️</div>
+                                    <h4 class="mode-title">Balanced</h4>
+                                    <p class="mode-desc">Harmonizes expenditure, transit fatigue, and experience scores for a well-rounded itinerary.</p>
+                                </div>
+                                <div class="mode-card" data-mode="Experience Maximizer">
+                                    <div class="mode-icon">🌟</div>
+                                    <h4 class="mode-title">Experience Maximizer</h4>
+                                    <p class="mode-desc">Maximizes total activity experience points, utilizing available budget and fastest transit options.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="wizard-actions mt-6">
+                            <span></span>
+                            <button class="btn btn-primary" id="wizard-btn-to-2">Next: Manage Locations →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Locations -->
+                <div class="wizard-pane" id="wizard-pane-2">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Step 2 — Destination & Trip Locations</h3>
+                                <p class="card-subtitle">Define points of interest and accommodation for graph construction.</p>
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="btn-modal-add-loc">+ Add Location</button>
+                        </div>
+
+                        <div class="locations-table-wrapper">
+                            <table class="data-table" id="table-locations">
+                                <thead>
+                                    <tr>
+                                        <th>Location ID / Name</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-locations"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="wizard-actions mt-6">
+                            <button class="btn btn-secondary" id="wizard-btn-back-1">← Back</button>
+                            <button class="btn btn-primary" id="wizard-btn-to-3">Next: Travel Connections →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Connections -->
+                <div class="wizard-pane" id="wizard-pane-3">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Step 3 — Weighted Travel Connections</h3>
+                                <p class="card-subtitle">Specify distances (km), transit times (mins), and modes between locations.</p>
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="btn-modal-add-conn">+ Add Connection</button>
+                        </div>
+
+                        <div class="connections-table-wrapper">
+                            <table class="data-table" id="table-connections">
+                                <thead>
+                                    <tr>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Distance (km)</th>
+                                        <th>Transit Time</th>
+                                        <th>Mode</th>
+                                        <th>Direction</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-connections"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="wizard-actions mt-6">
+                            <button class="btn btn-secondary" id="wizard-btn-back-2">← Back</button>
+                            <button class="btn btn-primary" id="wizard-btn-to-4">Next: Activity Database →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Activities -->
+                <div class="wizard-pane" id="wizard-pane-4">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Step 4 — Candidate Activities Database</h3>
+                                <p class="card-subtitle">Add candidate experiences with unit costs, durations, and experience ratings (1-10).</p>
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="btn-modal-add-act">+ Add Activity</button>
+                        </div>
+
+                        <div class="activities-table-wrapper">
+                            <table class="data-table" id="table-activities">
+                                <thead>
+                                    <tr>
+                                        <th>Activity Name</th>
+                                        <th>Location</th>
+                                        <th>Cost / Person</th>
+                                        <th>Group Cost</th>
+                                        <th>Duration</th>
+                                        <th>Rating (1-10)</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-activities"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="wizard-actions mt-6">
+                            <button class="btn btn-secondary" id="wizard-btn-back-3">← Back</button>
+                            <button class="btn btn-primary" id="wizard-btn-to-5">Next: Review & Run Optimizer →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Review & Run -->
+                <div class="wizard-pane" id="wizard-pane-5">
+                    <div class="content-card">
+                        <h3 class="card-title">Step 5 — Review Configuration & Run Optimization</h3>
+                        <p class="card-subtitle">Verify your parameters. Running the optimizer executes 0/1 Knapsack DP, Dijkstra, Floyd-Warshall, and TSP Branch & Bound.</p>
+
+                        <div class="review-summary-box" id="wizard-review-summary"></div>
+
+                        <div class="wizard-actions mt-6">
+                            <button class="btn btn-secondary" id="wizard-btn-back-4">← Back</button>
+                            <button class="btn btn-accent btn-lg" id="wizard-btn-run-all">
+                                <span>⚡ Execute All Optimization Algorithms</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: Budget Optimizer -->
+            <section class="view-panel" id="view-budget-optimizer">
+                <div class="section-top-bar">
+                    <div>
+                        <h2 class="section-main-heading">Budget Optimization Engine</h2>
+                        <p class="section-sub-heading">Category budget allocations, 0/1 Knapsack DP activity selection, and algorithmic re-optimization.</p>
+                    </div>
+                    <button class="btn btn-danger btn-sm" id="btn-reoptimize-trigger">
+                        <span>🔄 Re-optimize Trip</span>
+                    </button>
+                </div>
+
+                <!-- Re-optimization notification banner (if budget exceeded) -->
+                <div id="budget-overflow-banner" class="overflow-banner hidden">
+                    <div class="banner-content">
+                        <span class="banner-icon">⚠️</span>
+                        <div class="banner-text">
+                            <strong>Budget Overflow Detected!</strong>
+                            <span id="overflow-amount-text">The estimated trip cost exceeds your designated budget.</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger btn-sm" id="btn-banner-reoptimize">
+                        Auto Re-optimize with 0/1 Knapsack
+                    </button>
+                </div>
+
+                <div class="grid-2-cols">
+                    <!-- Allocation Sliders -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Budget Allocation Percentages</h3>
+                                <p class="card-subtitle">Adjust category percentages (Total must equal 100%)</p>
+                            </div>
+                            <span class="badge badge-blue" id="alloc-sum-badge">Sum: 100%</span>
+                        </div>
+
+                        <div class="sliders-wrapper" id="budget-sliders-container"></div>
+
+                        <div class="mt-4 flex-between">
+                            <button class="btn btn-secondary btn-sm" id="btn-reset-allocations">Reset to Smart Defaults</button>
+                            <button class="btn btn-primary btn-sm" id="btn-apply-allocations">Apply & Recalculate</button>
+                        </div>
+                    </div>
+
+                    <!-- Transportation Choice & Greedy Strategy -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Intercity Transportation Optimizer</h3>
+                                <p class="card-subtitle">Greedy multi-criteria evaluation of transit options</p>
+                            </div>
+                            <span class="badge badge-accent">Greedy Strategy</span>
+                        </div>
+
+                        <div id="transport-optimizer-details" class="transport-details-box"></div>
+                    </div>
+                </div>
+
+                <!-- 0/1 Knapsack Results & Comparison -->
+                <div class="content-card mt-6">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">0/1 Knapsack Optimal Activity Selection (DP)</h3>
+                            <p class="card-subtitle">
+                                Fixed Activity Budget: <strong id="knapsack-budget-display">₹5,000</strong> • 
+                                Formula: <code>max Σ(v_i × x_i) s.t. Σ(c_i × x_i) ≤ B</code>
+                            </p>
+                        </div>
+                        <div class="card-header-stats">
+                            <span class="metric-pill">DP Runtime: <strong id="knapsack-runtime">0.12 ms</strong></span>
+                            <span class="metric-pill highlight">Total Value: <strong id="knapsack-total-value">29 pts</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="knapsack-split-view">
+                        <!-- Selected Activities -->
+                        <div class="knapsack-column">
+                            <h4 class="sub-col-title text-success">✓ Selected by 0/1 Knapsack DP</h4>
+                            <div class="activity-cards-list" id="knapsack-selected-list"></div>
+                        </div>
+
+                        <!-- Rejected Activities -->
+                        <div class="knapsack-column">
+                            <h4 class="sub-col-title text-danger">✕ Excluded by 0/1 Knapsack DP</h4>
+                            <div class="activity-cards-list" id="knapsack-rejected-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Greedy Comparison Academic Card -->
+                    <div class="academic-callout mt-6">
+                        <div class="callout-header">
+                            <span class="callout-badge">AOA COMPARATIVE ANALYSIS</span>
+                            <h4 class="callout-title">0/1 Knapsack (DP) vs Greedy (Value/Cost Ratio)</h4>
+                        </div>
+                        <div class="callout-body" id="knapsack-greedy-comparison-body"></div>
+                    </div>
+
+                    <!-- Interactive DP Table Visualizer -->
+                    <div class="dp-table-container mt-6">
+                        <div class="dp-table-header">
+                            <h4 class="dp-table-title">Dynamic Programming Table Sampling (i vs w)</h4>
+                            <span class="text-muted text-xs">Cells denote max achievable experience value for subproblems DP[i][w]</span>
+                        </div>
+                        <div class="dp-table-scroll" id="knapsack-dp-table-wrapper"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: Route Planner -->
+            <section class="view-panel" id="view-route-planner">
+                <div class="section-top-bar">
+                    <div>
+                        <h2 class="section-main-heading">Route Planner & Graph Analytics</h2>
+                        <p class="section-sub-heading">Weighted location graph, Dijkstra shortest paths, and Floyd-Warshall all-pairs distance matrix.</p>
+                    </div>
+                </div>
+
+                <div class="grid-2-cols">
+                    <!-- Left: Interactive SVG Graph -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Trip Location Graph (Weighted Adjacency Network)</h3>
+                                <p class="card-subtitle">Click nodes to select endpoints for Dijkstra shortest route calculation</p>
+                            </div>
+                        </div>
+
+                        <div class="svg-graph-container" id="svg-graph-container">
+                            <!-- SVG injected by routeGraph.js -->
+                        </div>
+
+                        <div class="graph-legend">
+                            <span class="legend-item"><span class="dot hotel"></span> Accommodation</span>
+                            <span class="legend-item"><span class="dot attraction"></span> Attraction</span>
+                            <span class="legend-item"><span class="dot market"></span> Shopping</span>
+                            <span class="legend-item"><span class="dot transit"></span> Station</span>
+                            <span class="legend-item"><span class="dot path"></span> Shortest Route</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Dijkstra Solver & Step Player -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Dijkstra's Algorithm (Min-Heap)</h3>
+                                <p class="card-subtitle">Single-source shortest path with priority queue relaxation</p>
+                            </div>
+                            <span class="badge badge-cyan">O((V+E) log V)</span>
+                        </div>
+
+                        <div class="dijkstra-controls">
+                            <div class="form-group">
+                                <label for="dijkstra-start-select">Start Location:</label>
+                                <select id="dijkstra-start-select" class="form-control"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="dijkstra-end-select">Destination:</label>
+                                <select id="dijkstra-end-select" class="form-control"></select>
+                            </div>
+                            <div class="form-group flex-end">
+                                <button class="btn btn-primary w-full" id="btn-run-dijkstra">
+                                    <span>🔍 Find Shortest Path</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dijkstra Result Display -->
+                        <div id="dijkstra-result-box" class="dijkstra-result-box">
+                            <div class="empty-state">Select start and destination locations to run Dijkstra's algorithm.</div>
+                        </div>
+
+                        <!-- Step-by-Step Stepper -->
+                        <div class="stepper-box mt-4" id="dijkstra-stepper-box">
+                            <div class="stepper-header">
+                                <strong>Educational Step-by-Step Stepper:</strong>
+                                <span id="stepper-step-indicator" class="badge badge-accent">Step 0 / 0</span>
+                            </div>
+                            <div class="stepper-log" id="stepper-log-message">
+                                Run Dijkstra to enable step-by-step relaxation playback.
+                            </div>
+                            <div class="stepper-buttons">
+                                <button class="btn btn-secondary btn-sm" id="btn-step-prev" disabled>◀ Previous</button>
+                                <button class="btn btn-secondary btn-sm" id="btn-step-next" disabled>Next ▶</button>
+                                <button class="btn btn-primary btn-sm" id="btn-step-autoplay" disabled>▶ Auto Play</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floyd-Warshall All-Pairs Inspector Container -->
+                <div class="mt-6" id="floyd-warshall-container"></div>
+            </section>
+
+            <!-- VIEW: Daily Itinerary -->
+            <section class="view-panel" id="view-itinerary">
+                <div class="section-top-bar">
+                    <div>
+                        <h2 class="section-main-heading">Multi-Stop Itinerary & Schedule</h2>
+                        <p class="section-sub-heading">Traveling Salesperson Problem (TSP) Branch & Bound optimization and day-by-day timeline.</p>
+                    </div>
+                </div>
+
+                <!-- TSP Optimization Summary Card -->
+                <div class="content-card mb-6">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">Multi-Destination Sequence Optimization (TSP Branch & Bound)</h3>
+                            <p class="card-subtitle">Determines the optimal visiting order starting from Hotel, hitting all selected spots, and returning.</p>
+                        </div>
+                        <div class="header-pills">
+                            <span class="badge badge-accent">Exact Branch & Bound</span>
+                            <span class="badge badge-blue" id="tsp-stops-count">5 Stops</span>
+                        </div>
+                    </div>
+
+                    <div id="tsp-solution-metrics" class="tsp-metrics-grid"></div>
+
+                    <!-- TSP Tour Breadcrumb -->
+                    <div class="tsp-tour-path mt-4" id="tsp-tour-breadcrumb"></div>
+                </div>
+
+                <!-- Day-by-Day Timeline Cards -->
+                <div class="timeline-days-container" id="itinerary-days-container"></div>
+            </section>
+
+            <!-- VIEW: Algorithm Analysis -->
+            <section class="view-panel" id="view-algorithm-analysis">
+                <div id="algorithm-analysis-mount"></div>
+            </section>
+
+            <!-- VIEW: Saved Trips -->
+            <section class="view-panel" id="view-saved-trips">
+                <div class="section-top-bar">
+                    <div>
+                        <h2 class="section-main-heading">Saved Trips & Local Storage</h2>
+                        <p class="section-sub-heading">Manage persistent itineraries stored directly in your browser.</p>
+                    </div>
+                    <div class="flex-gap">
+                        <button class="btn btn-secondary btn-sm" id="btn-export-trips">Export JSON</button>
+                        <button class="btn btn-primary btn-sm" id="btn-saved-new-trip">+ Create Trip</button>
+                    </div>
+                </div>
+
+                <div class="saved-trips-grid" id="saved-trips-container"></div>
+            </section>
+
+            <!-- VIEW: About -->
+            <section class="view-panel" id="view-about">
+                <div class="content-card about-card">
+                    <div class="about-hero">
+                        <div class="about-icon">🎓</div>
+                        <h2 class="about-title">Smart Trip Budget Planner</h2>
+                        <p class="about-subtitle">An Analysis and Design of Algorithms (AOA) Academic Showcase</p>
+                    </div>
+
+                    <div class="about-section">
+                        <h3>Problem Statement</h3>
+                        <p>
+                            Modern travel planning involves multi-dimensional combinatorial optimization constraints:
+                            budget limits, pairwise transit distances, activity durations, and group experience preferences.
+                            This project bridges theoretical computer science with real-world travel software by genuinely
+                            implementing fundamental algorithms to solve exact optimization subproblems.
+                        </p>
+                    </div>
+
+                    <div class="about-grid">
+                        <div class="about-box">
+                            <h4>Algorithms Implemented</h4>
+                            <ul>
+                                <li><strong>0/1 Knapsack (DP):</strong> Activity selection under budget limit</li>
+                                <li><strong>Dijkstra (Min-Heap):</strong> Single-source shortest paths</li>
+                                <li><strong>Floyd-Warshall:</strong> All-pairs shortest path matrix</li>
+                                <li><strong>TSP Branch & Bound:</strong> Exact multi-stop itinerary ordering</li>
+                                <li><strong>Greedy Strategies:</strong> Transport selection & heuristics</li>
+                            </ul>
+                        </div>
+                        <div class="about-box">
+                            <h4>Data Structures Utilized</h4>
+                            <ul>
+                                <li><strong>Binary Min-Heap:</strong> Logarithmic priority queue operations</li>
+                                <li><strong>Adjacency List:</strong> Memory-efficient weighted graph representation</li>
+                                <li><strong>2D DP Matrices:</strong> Dynamic programming tables & snapshots</li>
+                                <li><strong>Sets & Maps:</strong> O(1) state lookups and visited tracking</li>
+                                <li><strong>State-Space Trees:</strong> Branch & bound pruning search</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="about-footer mt-6">
+                        <p>Built with Vanilla JavaScript, HTML5, CSS3, SVG, and HTML5 Canvas. Zero external runtime dependencies.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: Add/Edit Location -->
+    <div class="modal-overlay hidden" id="modal-location">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-loc-title">Add Location</h3>
+                <button class="btn-close" id="btn-close-modal-loc">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="input-loc-id">Location Name / ID *</label>
+                    <input type="text" id="input-loc-id" class="form-control" placeholder="e.g. City Palace" required>
+                </div>
+                <div class="form-group">
+                    <label for="select-loc-category">Category *</label>
+                    <select id="select-loc-category" class="form-control">
+                        <option value="Accommodation">Accommodation (Hotel/Stay)</option>
+                        <option value="Attraction" selected>Attraction / Sightseeing</option>
+                        <option value="Food">Food & Dining</option>
+                        <option value="Shopping">Shopping & Market</option>
+                        <option value="Transport">Transport Hub</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="input-loc-desc">Description</label>
+                    <textarea id="input-loc-desc" class="form-control" rows="2" placeholder="Historic landmark..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-modal-loc">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-modal-loc">Save Location</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add/Edit Connection -->
+    <div class="modal-overlay hidden" id="modal-connection">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-conn-title">Add Travel Connection</h3>
+                <button class="btn-close" id="btn-close-modal-conn">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="select-conn-from">Origin (From) *</label>
+                    <select id="select-conn-from" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="select-conn-to">Destination (To) *</label>
+                    <select id="select-conn-to" class="form-control"></select>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="input-conn-dist">Distance (km) *</label>
+                        <input type="number" id="input-conn-dist" class="form-control" min="0.1" step="0.1" value="2.5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-conn-time">Transit Time (mins) *</label>
+                        <input type="number" id="input-conn-time" class="form-control" min="1" value="15" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="select-conn-mode">Primary Mode</label>
+                    <select id="select-conn-mode" class="form-control">
+                        <option value="Cab">Cab / Taxi</option>
+                        <option value="Walking">Walking</option>
+                        <option value="Bus">Bus</option>
+                        <option value="Train">Train</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-checkbox">
+                    <input type="checkbox" id="check-conn-bidirectional" checked>
+                    <label for="check-conn-bidirectional">Bidirectional edge (A ↔ B with equal distance)</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-modal-conn">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-modal-conn">Save Connection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add/Edit Activity -->
+    <div class="modal-overlay hidden" id="modal-activity">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-act-title">Add Candidate Activity</h3>
+                <button class="btn-close" id="btn-close-modal-act">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="input-act-name">Activity Name *</label>
+                    <input type="text" id="input-act-name" class="form-control" placeholder="e.g. Palace Tour" required>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="input-act-cost">Cost / Person (₹) *</label>
+                        <input type="number" id="input-act-cost" class="form-control" min="0" step="50" value="400" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-act-duration">Duration (hours) *</label>
+                        <input type="number" id="input-act-duration" class="form-control" min="0.5" max="12" step="0.5" value="2.0" required>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="input-act-experience">Experience Score (1-10) *</label>
+                        <input type="number" id="input-act-experience" class="form-control" min="1" max="10" value="9" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="select-act-location">Location Association *</label>
+                        <select id="select-act-location" class="form-control"></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="select-act-category">Category</label>
+                    <select id="select-act-category" class="form-control">
+                        <option value="Heritage">Heritage</option>
+                        <option value="Adventure">Adventure</option>
+                        <option value="Culture">Culture</option>
+                        <option value="Food">Food</option>
+                        <option value="Nature">Nature</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="input-act-desc">Description</label>
+                    <textarea id="input-act-desc" class="form-control" rows="2" placeholder="Brief summary..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-modal-act">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-modal-act">Save Activity</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Entry Script -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
